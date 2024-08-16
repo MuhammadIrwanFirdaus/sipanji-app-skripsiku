@@ -1,0 +1,112 @@
+  /* Warna latar belakang untuk baris ganjil */
+  table tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+
+
+#calendar {
+    background-color: blue;
+    color:black; /* Atur warna teks agar kontras dengan latar belakang */
+}
+  /* Gaya hover pada baris tabel */
+table tr:hover {
+    background-color: #ddd;
+}
+.navbar {
+    z-index: 2;
+}
+        /* Memusatkan kontainer secara horizontal */
+        .container {
+            margin: 0 auto;
+            text-align: center; /* Memusatkan isi secara horizontal */
+            max-width: 800px; /* Tetapkan lebar maksimum sesuai kebutuhan */
+        }
+
+        /* Memusatkan kontainer secara vertikal (opsional) */
+        .container {
+            height: 100vh; /* Tetapkan tinggi tertentu atau gunakan metode lain untuk menentukan tinggi */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+#notification {
+        background-color: #f8f8f8;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin-top: 10px;
+        text-align: center;
+    }
+
+    /* Kalender styling */
+#calendar {
+    max-width: 800px;
+    margin: 0 auto;
+    z-index: 1;
+    margin-left: 10px;
+    position: relative;
+}
+
+#content {
+    flex: 1; /* Ini akan mengisi sisa ruang di sebelah kanan sidebar */
+    padding: 20px; /* Atur jarak dari tepi konten utama */
+    z-index: 1;
+}
+#addEventForm {
+            display: none;
+            max-width: 600px; /* Sesuaikan lebar maksimum sesuai kebutuhan Anda */
+    margin: 0 auto; /* Memusatkan form secara horizontal */
+}
+.close-button {
+    float: right; /* Menggeser tombol ke kiri */
+    margin-left: 60px; /* Memberi jarak sebelah kanan tombol "close" */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: red; /* Warna merah untuk tombol "close" */
+}
+
+.fa-plus-square {
+    font-size: 32px; /* Sesuaikan ukuran ikon sesuai kebutuhan Anda */
+}
+        /* Center the form navbar horizontally and vertically */
+        .form-navbar {
+            display: flex;
+            justify-content: left; /* Horizontal centering */
+            align-items: center; /* Vertical centering */
+        }
+
+           /* Tambahkan gaya CSS untuk mengatur tampilan responsif */
+           @media (max-width: 768px) {
+            .wrapper {
+                padding-left: 0; /* Hapus padding kiri pada wrapper */
+                
+            }
+            .form-control {
+                max-width: 100%; /* Maksimum lebar input saat layar kecil */
+            }
+
+            .wrapper.toggled {
+                padding-left: 250px; /*Kembalikan padding kiri saat sidebar terbuka */
+            }
+
+            /* Tambahkan gaya CSS untuk mengatur tampilan kalender dan tabel pada layar kecil */
+            #calendar {
+                margin-left: -15px; /* Koreksi margin untuk kalender */
+            }
+
+            .card-title {
+                font-size: 1.25rem; /* Ukuran font judul card */
+            }   
+        }
+
+        .button-with-margin {
+    margin: 10px; /* Sesuaikan nilai 10px sesuai dengan kebutuhan jarak yang Anda inginkan */
+}
+
+                    /* CSS untuk tabel responsif */
+            .responsive-table {
+                overflow-x: auto;
+                white-space: nowrap;
+            }

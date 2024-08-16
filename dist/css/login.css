@@ -1,0 +1,43 @@
+
+    body {
+        background-color: #f2f2f2; /* Warna latar belakang halaman */
+        font-family: Arial, sans-serif; /* Jenis font teks */
+    }
+
+    .login-container {
+        background-color: #fff; /* Warna latar belakang kontainer login */
+        border-radius: 5px; /* Rounding sudut kontainer */
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); /* Efek bayangan kontainer */
+        padding: 20px; /* Ruang dalam kontainer */
+        width: 300px; /* Lebar kontainer */
+        margin: 0 auto; /* Posisikan tengah kontainer */
+        margin-top: 100px; /* Jarak dari atas halaman */
+    }
+
+    .login-header {
+        text-align: center; /* Pusatkan teks header */
+        font-size: 24px; /* Ukuran font header */
+        margin-bottom: 20px; /* Jarak antara header dan form */
+    }
+
+    .login-form input[type="text"],
+    .login-form input[type="password"] {
+        width: 100%; /* Lebar input form */
+        padding: 10px; /* Ruang dalam input form */
+        margin-bottom: 10px; /* Jarak antara input form */
+        border: 1px solid #ccc; /* Garis tepi input form */
+        border-radius: 3px; /* Rounding sudut input form */
+    }
+
+    .login-form input[type="submit"] {
+        background-color: #007bff; /* Warna latar belakang tombol submit */
+        color: #fff; /* Warna teks tombol submit */
+        padding: 10px 20px; /* Ruang dalam tombol submit */
+        border: none; /* Tanpa garis tepi tombol submit */
+        border-radius: 3px; /* Rounding sudut tombol submit */
+        cursor: pointer; /* Pointer tangan saat di atas tombol submit */
+    }
+
+    .login-form input[type="submit"]:hover {
+        background-color: #0056b3; /* Warna latar belakang tombol submit saat hover */
+    }
