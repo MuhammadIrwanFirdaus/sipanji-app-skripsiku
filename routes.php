@@ -304,6 +304,13 @@ if (isset($_GET['page'])){
                                             include 'pages/404.php';
                                         }
                                         break;
+                                        case 'halaman-kadis':
+                                            if (file_exists('pages/beranda/kepala_dinas.php')) {
+                                                include 'pages/beranda/kepala_dinas.php';
+                                            } else {
+                                                include 'pages/404.php';
+                                            }
+                                            break;
                                         case 'halaman-umum':
                                             if (file_exists('pages/beranda/umum.php')) {
                                                 include 'pages/beranda/umum.php';
@@ -507,6 +514,13 @@ if (isset($_GET['page'])){
                                                                                                                                             include 'pages/404.php';
                                                                                                                                     }
                                                                                                                                     break;
+                                                                                                                                    case 'pdf-surat-pengajuan':
+                                                                                                                                        if (file_exists('pages/data-pengajuan/surat_pengajuan.php')) {
+                                                                                                                                            include 'pages/data-pengajuan/surat_pengajuan.php';
+                                                                                                                                        } else {
+                                                                                                                                                include 'pages/404.php';
+                                                                                                                                        }
+                                                                                                                                        break;
                 default:
             include 'pages/404.php';
     }

@@ -13,19 +13,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = isset($_POST['title']) ? $_POST['title'] : null;
     $tanggal = isset($_POST['tanggal']) ? $_POST['tanggal'] : null;
     $keterangan = isset($_POST['keterangan']) ? $_POST['keterangan'] : null;
+    $pemasang = isset($_POST['pemasang']) ? $_POST['pemasang'] : array();
 
-    $insertSQL = "INSERT INTO events (no_pengajuan, title, tanggal, keterangan) VALUES (?, ?, ?, ?)";
+    // Gabungkan nama pemasang dengan separator koma
+    $pemasang_list = implode(', ', $pemasang);
+
+    $insertSQL = "INSERT INTO events (no_pengajuan, title, tanggal, keterangan, pemasang) VALUES (?, ?, ?, ?, ?)";
     $stmt = $db->prepare($insertSQL);
+
     $stmt->bindParam(1, $no_pengajuan);
     $stmt->bindParam(2, $title);
     $stmt->bindParam(3, $tanggal);
     $stmt->bindParam(4, $keterangan);
+    $stmt->bindParam(5, $pemasang_list);
 
-    if ($stmt->execute()) {
-        echo "Berhasil Simpan Data";
-    } else {
+    if (!$stmt->execute()) {
         echo "Gagal Simpan Data";
+        exit();
     }
+
+    echo "Berhasil Simpan Data";
     echo "<meta http-equiv='refresh' content='0; url=?page=Jadwal'>";
     exit();
 }
@@ -53,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
                 <label for="tanggal">Tanggal dan Waktu</label>
-                <input type="datetime-local" class="form-control" id="tanggal" name="tanggal" required>
+                <input type="date" class="form-control" id="tanggal" name="tanggal" required>
             </div>
             <div class="form-group">
                 <label for="keterangan">Keterangan</label>
@@ -64,6 +71,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option value="pemeliharaan">Pemeliharaan</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label for="pemasang">Pemasang</label>
+                <div id="pemasangFields">
+                    <input type="text" class="form-control mt-2" name="pemasang[]" placeholder="Nama Pemasang">
+                </div>
+                <button type="button" class="btn btn-success mt-2" id="addPemasang">Tambah Pemasang</button>
+            </div>
             <button type="submit" class="btn btn-primary">Tambah Jadwal</button>
             <a href="index.php?page=Jadwal" class="btn btn-secondary">Kembali</a>
         </form>
@@ -71,5 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script src="assets/jquery.min.js"></script>
     <script src="plugin-fa/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#addPemasang').click(function() {
+                $('#pemasangFields').append('<input type="text" class="form-control mt-2" name="pemasang[]" placeholder="Nama Pemasang">');
+            });
+        });
+    </script>
 </body>
 </html>

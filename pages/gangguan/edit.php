@@ -12,9 +12,9 @@ if (isset($_GET['id'])) {
     
     if (isset($row['id'])) {
         if (isset($_POST['button_update'])) {
-            $updateSQL = "UPDATE gangguan SET gangguan = ?, nama_tempat = ?, perwakilan = ?, nomor_telepon = ?, tgl_masuk = ? WHERE id=?";
+            $updateSQL = "UPDATE gangguan SET no_pengajuan = ?, nama_tempat = ?, perwakilan = ?, nomor_telepon = ?, tgl_masuk = ? WHERE id=?";
             $stmtUpdate = $db->prepare($updateSQL);
-            $stmtUpdate->bindParam(1, $_POST['gangguan']);
+            $stmtUpdate->bindParam(1, $_POST['no_pengajuan']);
             $stmtUpdate->bindParam(2, $_POST['nama_tempat']);
             $stmtUpdate->bindParam(3, $_POST['perwakilan']);
             $stmtUpdate->bindParam(4, $_POST['nomor_telepon']);

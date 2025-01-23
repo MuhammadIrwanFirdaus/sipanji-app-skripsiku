@@ -56,6 +56,9 @@ try {
                         case 'umum':
                             header("Location: ../../index.php?page=halaman-umum");
                             break;
+                            case 'kadis':
+                                header("Location: ../../index.php?page=halaman-kadis");
+                                break;
                         default:
                             header("Location: login.php?error=invalid_role");
                             break;

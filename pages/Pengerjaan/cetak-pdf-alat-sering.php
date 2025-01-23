@@ -30,6 +30,68 @@ class PDF extends FPDF {
     }
 }
 
+// Fungsi untuk membuat grafik lingkaran (pie chart)
+function createPieChart($data, $filename) {
+    $width = 500;  // Perbesar ukuran gambar
+    $height = 500;
+    $image = imagecreatetruecolor($width, $height);
+    $backgroundColor = imagecolorallocate($image, 255, 255, 255);
+    imagefill($image, 0, 0, $backgroundColor);
+
+    // Warna untuk setiap bagian pie chart
+    $colors = [
+        imagecolorallocate($image, 255, 0, 0),  // Merah
+        imagecolorallocate($image, 0, 255, 0),  // Hijau
+        imagecolorallocate($image, 0, 0, 255),  // Biru
+        imagecolorallocate($image, 255, 255, 0),  // Kuning
+        imagecolorallocate($image, 255, 0, 255)   // Magenta
+    ];
+
+    $labelColors = [
+        imagecolorallocate($image, 255, 255, 255),  // Putih untuk label agar kontras
+        imagecolorallocate($image, 0, 0, 0),        // Hitam
+        imagecolorallocate($image, 255, 255, 255),  // Putih
+        imagecolorallocate($image, 0, 0, 0),        // Hitam
+        imagecolorallocate($image, 255, 255, 255)   // Putih
+    ];
+
+    $total = array_sum($data);
+    $startAngle = 0;
+    $centerX = $width / 2;
+    $centerY = $height / 2;
+    $radius = min($centerX, $centerY) - 50;
+
+    // Menggambar setiap slice pie
+    $colorIndex = 0;
+    foreach ($data as $key => $value) {
+        if ($value == 0) continue;  // Tidak menggambar bagian jika nilai 0
+
+        $percentage = $value / $total;
+        $endAngle = $startAngle + ($percentage * 360);
+
+        // Menggambar bagian pie
+        imagefilledarc($image, $centerX, $centerY, 2 * $radius, 2 * $radius, $startAngle, $endAngle, $colors[$colorIndex], IMG_ARC_PIE);
+
+        // Menempatkan label di dalam bagian pie
+        $midAngle = deg2rad(($startAngle + $endAngle) / 2);
+        $labelX = $centerX + cos($midAngle) * ($radius / 2); // Letakkan label di tengah-tengah pie
+        $labelY = $centerY + sin($midAngle) * ($radius / 2);
+        $label = "$key: $value";
+        imagestring($image, 5, $labelX - (strlen($label) * 3), $labelY - 7, $label, $labelColors[$colorIndex]);
+
+        $startAngle = $endAngle;
+        $colorIndex = ($colorIndex + 1) % count($colors);
+    }
+
+    if (!is_dir('uploaded_images')) {
+        mkdir('uploaded_images', 0755, true);
+    }
+
+    $filepath = 'uploaded_images/' . $filename;
+    imagepng($image, $filepath);
+    imagedestroy($image);
+}
+
 // Fungsi untuk menghasilkan laporan PDF
 function generatePDF() {
     ob_end_clean();
@@ -46,6 +108,15 @@ function generatePDF() {
 
     $stmt = $db->prepare($selectSql);
     $stmt->execute();
+
+    // Mengumpulkan data untuk grafik pie
+    $data = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $data[$row['alat']] = $row['total_stok'];
+    }
+
+    // Membuat grafik pie
+    createPieChart($data, 'pie_chart.png');
 
     // Membuat instance FPDF
     $pdf = new PDF();
@@ -64,11 +135,15 @@ function generatePDF() {
 
     // Table Data
     $pdf->SetFont('Arial', '', 10);
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $pdf->Cell(100, 10, $row['alat'], 1);
-        $pdf->Cell(90, 10, $row['total_stok'], 1);
+    foreach ($data as $alat => $total_stok) {
+        $pdf->Cell(100, 10, $alat, 1);
+        $pdf->Cell(90, 10, $total_stok, 1);
         $pdf->Ln();
     }
+
+    // Tambahkan grafik ke dalam PDF
+    $pdf->Image('uploaded_images/pie_chart.png', 60, $pdf->GetY() + 10, 100, 100);
+    $pdf->Ln(110);
 
     // Output PDF
     $pdf->Output('D', 'laporan_alat_sering_digunakan.pdf');

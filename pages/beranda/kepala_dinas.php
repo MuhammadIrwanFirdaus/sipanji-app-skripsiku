@@ -1,6 +1,41 @@
 <?php
 include "pages/login/function.php";
-check_access('kominfo');
+check_access('kadis');
+
+// Konfigurasi koneksi ke basis data
+$host = "localhost";
+$dbname = "sipanji";
+$username = "root";
+$password = "";
+
+try {
+    $db = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Periksa apakah ada permintaan untuk menghapus komentar
+    if (isset($_POST['delete_comment'])) {
+        $comment_id = $_POST['comment_id'];
+
+        // Query untuk menghapus komentar
+        $query = "DELETE FROM kepuasan_pelayanan WHERE id = :id";
+        $stmt = $db->prepare($query);
+        $stmt->bindParam(':id', $comment_id);
+
+        if ($stmt->execute()) {
+            $_SESSION['hasil'] = true;
+            $_SESSION['pesan'] = "Komentar berhasil dihapus.";
+        } else {
+            $_SESSION['hasil'] = false;
+            $_SESSION['pesan'] = "Gagal menghapus komentar.";
+        }
+
+        // Redirect untuk menghindari pengiriman ulang formulir
+        header("Location: ?page=halaman-kadis");
+        exit();
+    }
+} catch(PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
 
 // Query untuk mengambil data dari tabel data_pengajuan
 $query = "
@@ -46,12 +81,13 @@ $satisfactionData = array_fill(1, 12, 0); // Inisialisasi dengan 0 untuk setiap 
 while ($row = $stmtSatisfaction->fetch(PDO::FETCH_ASSOC)) {
     $satisfactionData[(int)$row['bulan']] = round($row['rata_rata'], 1);
 }
+
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Halaman Bagian Jaringan</title>
+    <title>Halaman Kadis</title>
     <style>
         #map {
             height: 400px;
@@ -61,52 +97,54 @@ while ($row = $stmtSatisfaction->fetch(PDO::FETCH_ASSOC)) {
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body>
     <section class="content">
         <div class="container-fuild">
-                    <!-- Small boxes (Stat box) -->
-        <div class="row">
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-success">
-              <div class="inner">
-                <h3><i class="nav-icon fas fa-calendar"></i> Jadwal</h3>
-              </div>
-              <div class="icon">
-                <i class="ion ion-stats-bars"></i>
-              </div>
-              <a href="?page=Jadwal" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+            <!-- Small boxes (Stat box) -->
+            <div class="row">
+                <!-- ./col -->
+                <!-- ./col -->
+                <div class="col-lg-3 col-6">
+                    <!-- small box -->
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3><i class="nav-icon fas fa-calendar"></i> Jadwal</h3>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-stats-bars"></i>
+                        </div>
+                        <a href="?page=Jadwal" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <!-- ./col -->
+                <div class="col-lg-3 col-6">
+                    <!-- small box -->
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3><i class="nav-icon fas fa-file"></i> Pengerjaan</h3>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-person-add"></i>
+                        </div>
+                        <a href="?page=tampil-pengerjaan" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <!-- ./col -->
+                <div class="col-lg-3 col-6">
+                    <!-- small box -->
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3><i class="fas fa-bug"></i> Gangguan</h3>
+                        </div>
+                        <div class="icon">
+                            <i class="ion ion-pie-graph"></i>
+                        </div>
+                        <a href="?page=tampil-gangguan" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
             </div>
-          </div>
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-warning">
-              <div class="inner">
-                <h3><i class="nav-icon fas fa-file"></i> Pengerjaan</h3>
-              </div>
-              <div class="icon">
-                <i class="ion ion-person-add"></i>
-              </div>
-              <a href="?page=tampil-pengerjaan" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ./col -->
-          <div class="col-lg-3 col-6">
-            <!-- small box -->
-            <div class="small-box bg-danger">
-              <div class="inner">
-                <h3><i class="fas fa-cogs nav-icon"></i> Stok Alat</h3>
-              </div>
-              <div class="icon">
-                <i class="ion ion-pie-graph"></i>
-              </div>
-              <a href="?page=tampil-stok-alat" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-            </div>
-          </div>
-          <!-- ./col -->
-        </div>
 <!-- Map Section and Grafik Pelayanan Section -->
 <div class="row">
     <div class="col-6">
@@ -131,6 +169,7 @@ while ($row = $stmtSatisfaction->fetch(PDO::FETCH_ASSOC)) {
         </div>
     </div>
 </div>
+
 <div class="col-6">
     <div class="card">
         <div class="card-header">
@@ -141,7 +180,6 @@ while ($row = $stmtSatisfaction->fetch(PDO::FETCH_ASSOC)) {
         </div>
     </div>
 </div>
-
 
 <!-- Tampilkan Komentar -->
 <div class="row">
@@ -169,8 +207,10 @@ while ($row = $stmtSatisfaction->fetch(PDO::FETCH_ASSOC)) {
     </div>
 </div>
 
+
         </div>
     </section>
+
     <script>
         var map = L.map('map').setView([-3.440425,114.8324361], 15); // Koordinat DISKOMINFO KOTA BANJARBARU
 

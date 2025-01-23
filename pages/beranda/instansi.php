@@ -37,6 +37,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = "Terjadi kesalahan, coba lagi.";
     }
 }
+// Query untuk mengambil data dari tabel data_pengajuan
+$query = "
+    SELECT 
+        MONTH(tgl_masuk) as bulan, 
+        COUNT(*) as jumlah 
+    FROM 
+        data_pengajuan 
+    WHERE 
+        tgl_masuk >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+    GROUP BY 
+        MONTH(tgl_masuk)
+    ORDER BY 
+        MONTH(tgl_masuk)
+";
+$stmt = $db->prepare($query);
+$stmt->execute();
+
+$pelayananData = array_fill(1, 12, 0); // Inisialisasi dengan 0 untuk setiap bulan
+
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $pelayananData[(int)$row['bulan']] = $row['jumlah'];
+}
+// Query untuk mengambil rata-rata kepuasan pelayanan per bulan selama 1 tahun terakhir
+$querySatisfaction = "
+    SELECT 
+        MONTH(tanggal) as bulan, 
+        AVG(penilaian) as rata_rata 
+    FROM 
+        kepuasan_pelayanan 
+    WHERE 
+        tanggal >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR)
+    GROUP BY 
+        MONTH(tanggal)
+    ORDER BY 
+        MONTH(tanggal)
+";
+$stmtSatisfaction = $db->prepare($querySatisfaction);
+$stmtSatisfaction->execute();
+
+$satisfactionData = array_fill(1, 12, 0); // Inisialisasi dengan 0 untuk setiap bulan
+
+while ($row = $stmtSatisfaction->fetch(PDO::FETCH_ASSOC)) {
+    $satisfactionData[(int)$row['bulan']] = round($row['rata_rata'], 1);
+}
 ?>
 
 <!DOCTYPE html>
@@ -54,6 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <section class="content">
@@ -113,19 +158,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                                 <!-- ./col -->
             </div>
-            <!-- Map Section -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Lokasi DISKOMINFO KOTA BANJARBARU</h3>
-                        </div>
-                        <div class="card-body">
-                            <div id="map"></div>
-                        </div>
-                    </div>
-                </div>
+<!-- Map Section and Grafik Pelayanan Section -->
+<div class="row">
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Lokasi DISKOMINFO KOTA BANJARBARU</h3>
             </div>
+            <div class="card-body">
+                <div id="map" style="height: 400px;"></div> <!-- Pastikan tinggi peta tetap sesuai -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Grafik Pelayanan Selama 1 Tahun Terakhir</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="pelayananChart" style="height: 400px;"></canvas> <!-- Tinggi grafik disesuaikan -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-6">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Grafik Kepuasan Pelayanan Selama 1 Tahun Terakhir</h3>
+        </div>
+        <div class="card-body">
+            <canvas id="satisfactionChart" style="height: 400px;"></canvas> <!-- Tinggi grafik disesuaikan -->
+        </div>
+    </div>
+</div>
 
             <!-- Komentar Pelayanan Section -->
             <div class="row">
@@ -207,6 +274,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         marker.on('click', function() {
             window.open('https://www.google.com/maps?q=-3.440425,114.8324361', '_blank');
         });
+
+        var ctx = document.getElementById('pelayananChart').getContext('2d');
+    var pelayananData = <?php echo json_encode(array_values($pelayananData)); ?>;
+
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+            datasets: [{
+                label: 'Jumlah Pelayanan',
+                data: pelayananData,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    
+    var ctxSatisfaction = document.getElementById('satisfactionChart').getContext('2d');
+    var satisfactionData = <?php echo json_encode(array_values($satisfactionData)); ?>;
+
+    var satisfactionChart = new Chart(ctxSatisfaction, {
+        type: 'line',
+        data: {
+            labels: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+            datasets: [{
+                label: 'Rata-Rata Kepuasan Pelayanan',
+                data: satisfactionData,
+                borderColor: 'rgba(153, 102, 255, 1)',
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
     </script>
 </body>
 </html>

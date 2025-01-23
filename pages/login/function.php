@@ -86,5 +86,36 @@ function sendTelegramMessage($message) {
     }
 }
 
+function sendWhatsAppMessage($message, $phoneNumber) {
+    $apiKey = 'kMBcxn5kcyNuko4uZKxY'; // Ganti dengan API key dari Fonnte
+    $url = 'https://api.fonnte.com/send';
+
+    $data = [
+        'target' => $phoneNumber,  // Nomor tujuan, format: 6281234567890
+        'message' => $message,     // Pesan yang ingin dikirim
+        'countryCode' => '62',     // Kode negara, misalnya '62' untuk Indonesia
+    ];
+
+    $headers = [
+        'Authorization: ' . $apiKey
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+    $response = curl_exec($ch);
+    if (curl_errno($ch)) {
+        echo 'Error:' . curl_error($ch);
+    }
+
+    curl_close($ch);
+
+    return $response;
+}
+
 
 ?>

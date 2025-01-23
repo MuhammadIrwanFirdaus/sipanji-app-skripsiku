@@ -85,6 +85,7 @@ if(isset($_GET['id'])) {
                     <option value="">Pilih Keterangan</option>
                     <option value="survey">Survey</option>
                     <option value="pemasangan">Pemasangan</option>
+                    <option value="pemeliharaan">Pemeliharaan</option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Simpan Perubahan</button>

@@ -17,7 +17,7 @@ function indoDate($datetime) {
 
 class PDF extends FPDF {
     function Header() {
-        $this->Image('dist/img/Logo Banjarbaru.jpg', 10, 10, 40);
+        $this->Image('dist/img/Logo Banjarbaru.jpg', 10, 10, 30);
         $this->SetFont('Arial', 'B', 16);
         $this->Cell(0, 5, 'Pemerintah Kota Banjarbaru', 0, 1, 'C');
         $this->Cell(0, 5, 'Dinas Komunikasi dan Informatika Kota Banjarbaru', 0, 1, 'C');
@@ -76,7 +76,7 @@ $pdf->Ln(10);
 $pdf->SetFont('Arial', 'B', 12);
 $pdf->Cell(60, 10, 'Tanggal', 1);
 $pdf->Cell(60, 10, 'Tempat', 1);
-$pdf->Cell(90, 10, 'Keterangan', 1);
+$pdf->Cell(60, 10, 'Keterangan', 1);
 $pdf->Ln();
 
 // Isi Tabel
@@ -84,7 +84,7 @@ $pdf->SetFont('Arial', '', 12);
 foreach ($jadwalData as $jadwal) {
     $pdf->Cell(60, 10, indoDate($jadwal['tanggal']), 1);
     $pdf->Cell(60, 10, $jadwal['title'], 1);
-    $pdf->Cell(90, 10, $jadwal['keterangan'], 1);
+    $pdf->Cell(60, 10, $jadwal['keterangan'], 1);
     $pdf->Ln();
 }
 

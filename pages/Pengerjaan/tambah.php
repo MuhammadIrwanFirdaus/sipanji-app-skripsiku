@@ -1,4 +1,5 @@
 <?php
+include "pages/login/function.php";
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -62,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bindValue(':foto_pengerjaan', $foto);
                 $stmt->bindValue(':biaya_tambahan', $biaya_tambahan);
     
-                // Simpan data ke database
+               // Simpan data ke database
                 if ($stmt->execute()) {
                     // Update stok alat
                     $updateStokSQL = "UPDATE stok_alat SET jumlah = jumlah - :jumlah_terpakai WHERE nama_alat = :nama_alat";
@@ -70,9 +71,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmtStok->bindValue(':jumlah_terpakai', $stok_terpakai, PDO::PARAM_INT);
                     $stmtStok->bindValue(':nama_alat', $alat);
                     $stmtStok->execute();
+
+                                        // Ambil no_telpon dari tabel pengajuan berdasarkan no_pengajuan
+                    $noTelponQueryPengajuan = "SELECT no_telpon FROM data_pengajuan WHERE no_pengajuan = :no_pengajuan";
+                    $stmtNoTelponPengajuan = $db->prepare($noTelponQueryPengajuan);
+                    $stmtNoTelponPengajuan->bindValue(':no_pengajuan', $no_pengajuan);
+                    $stmtNoTelponPengajuan->execute();
+                    $noTelponPengajuan = $stmtNoTelponPengajuan->fetch(PDO::FETCH_ASSOC);
+
+                    if ($noTelponPengajuan) {
+                        $noTelpon = $noTelponPengajuan['no_telpon'];
+                    } else {
+                        $noTelponQueryGangguan = "SELECT nomor_telepon FROM gangguan WHERE no_pengajuan = :no_pengajuan";
+                        $stmtNoTelponGangguan = $db->prepare($noTelponQueryGangguan);
+                        $stmtNoTelponGangguan->bindValue(':no_pengajuan', $no_pengajuan);
+                        $stmtNoTelponGangguan->execute();
+                        $noTelponGangguan = $stmtNoTelponGangguan->fetch(PDO::FETCH_ASSOC);
+
+                        if ($noTelponGangguan) {
+                            $noTelpon = $noTelponGangguan['nomor_telepon'];
+                        }
+                    }
+
+                    // Jika no_telpon ditemukan di salah satu tabel
+                    if (isset($noTelpon)) {
+                        // Pesan yang akan dikirim
+                        $pesan = "Pengerjaan dengan No. Pengajuan {$no_pengajuan} telah berhasil diselesaikan di {$tempat}. Terima kasih.";
+                        // Kirim notifikasi melalui WhatsApp menggunakan gateway WA Fonnte
+                        sendWhatsAppMessage($pesan, $noTelpon);
+                    } else {
+                        echo "<script>alert('Nomor telepon tidak ditemukan untuk No. Pengajuan {$no_pengajuan}');</script>";
+                    }
                 } else {
                     echo "<script>alert('Gagal menyimpan data ke database untuk alat {$alat}');</script>";
                 }
+
             } else {
                 echo "<script>alert('Gagal mengunggah file foto untuk alat {$alat}');</script>";
             }

@@ -25,6 +25,7 @@
                 </thead>
                 <tbody>
                     <?php
+                    include "pages/login/function.php";
                     function formatRupiah($angka) {
                         return 'Rp ' . number_format($angka, 2, ',', '.');
                     }
@@ -37,6 +38,11 @@
                     $stmt->execute();
                     $no = 1;
                     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        // Jika stok menipis (kurang atau sama dengan 10), kirim notifikasi Telegram
+                        if ($row['jumlah'] <= 10) {
+                            $message = "Stok alat '" . $row['nama_alat'] . "' mulai kehabisan, tersisa " . $row['jumlah'] . " unit.";
+                            sendTelegramMessage($message);
+                        }
                     ?>
                         <tr>
                             <td><?php echo $no++ ?></td>

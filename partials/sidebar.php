@@ -64,11 +64,13 @@ try {
                     <li class="nav-item"><a href="?page=halaman-instansi" class="nav-link active bg-info"><i class="nav-icon fas fa-home"></i> Home</a></li>
                 <?php elseif ($peran == 'umum'): ?>
                     <li class="nav-item"><a href="?page=halaman-umum" class="nav-link active bg-info"><i class="nav-icon fas fa-home"></i> Home</a></li>
+                    <?php elseif ($peran == 'kadis'): ?>
+                        <li class="nav-item"><a href="?page=halaman-kadis" class="nav-link active bg-info"><i class="nav-icon fas fa-home"></i> Home</a></li>
                 <?php else: ?>
                     <li class="nav-item"><a href="pages/login/view.php" class="nav-link"><i class="nav-icon fas fa-sign-in-alt"></i> Login</a></li>
                 <?php endif; ?>
 
-                <?php if ($peran == 'admin'): ?>
+                <?php if ($peran == 'admin' || $peran == 'kadis'): ?>
                 <li class="nav-item">
                     <a href="?page=#" class="nav-link">
                         <i class="fas fa-file nav-icon"></i>

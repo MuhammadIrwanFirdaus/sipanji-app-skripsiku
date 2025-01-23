@@ -9,7 +9,7 @@ function indoDate($datetime) {
     
     $day = date('w', strtotime($datetime));
     $month = date('n', strtotime($datetime));
-    $date = date('j', strtotime($datetime)); // Mendapatkan angka tanggal
+    $date = date('j', strtotime($datetime));
 
     return $indoDays[$day] . ', ' . $date . ' ' . $indoMonths[$month - 1] . date(' Y - H:i', strtotime($datetime));
 }
@@ -17,26 +17,22 @@ function indoDate($datetime) {
 class PDF extends FPDF {
     function Header() {
         // Logo dan Kop Surat
-        $this->Image('dist/img/Logo Banjarbaru.jpg', 10, 10, 40); // Ganti dengan path logo Anda dan atur ukuran gambar
-        $this->SetFont('Arial', 'B', 16); // Atur ukuran font nama perusahaan
-        $this->Cell(0, 5, 'Pemerintah Kota Banjarbaru', 0, 1, 'C');
-        $this->Cell(0, 5, 'Dinas Komunikasi dan Informatika Kota Banjarbaru', 0, 1, 'C');
-        $this->SetFont('Arial', 'B', 8); // Atur ukuran font nama perusahaan
-        $this->Cell(0, 5, 'Loktabat Utara, Kec. Banjarbaru Utara, Kota Banjar Baru, Kalimantan Selatan 70714', 0, 1, 'C');
+        $this->Image('dist/img/Logo Banjarbaru.jpg', 10, 10, 40); 
+        $this->SetFont('Arial', 'B', 16); 
+        $this->Cell(0, 5, 'PEMERINTAH KOTA BANJARBARU', 0, 1, 'C');
+        $this->Cell(0, 5, 'DINAS KOMUNIKASI DAN INFORMATIKA', 0, 1, 'C');
+        $this->SetFont('Arial', 'B', 10);
+        $this->Cell(0, 5, 'Loktabat Utara, Kec. Banjarbaru Utara, Kota Banjarbaru, Kalimantan Selatan 70714', 0, 1, 'C');
         $this->Cell(0, 5, 'Telepon: 0811-5289-090', 0, 1, 'C');
 
-        // Tambahkan sedikit jarak antara kop dan garis
         $this->Ln(5);
-
-        // Tambahkan garis di bawah kop surat
         $this->SetLineWidth(0.5);
         $this->Line(10, $this->GetY() + 1, $this->GetPageWidth() - 10, $this->GetY() + 1);
 
-        $this->Ln(10); // Menambahkan jarak antara judul dan gambar
+        $this->Ln(10);
     }
 
     function Footer() {
-        // Footer content, including barcode signature
         $this->SetY(-15);
         $this->SetFont('Arial', 'I', 8);
         $this->Cell(0, 10, 'Page ' . $this->PageNo(), 0, false, 'C', 0, '', 0, false, 'T', 'M');
@@ -45,71 +41,77 @@ class PDF extends FPDF {
 
 function createPDF($id) {
     ob_end_clean();
-    // Membuat koneksi ke database
     $database = new Database();
     $db = $database->getConnection();
 
-    // Query untuk mengambil data dari tabel events dengan filter ID
     $selectSql = "SELECT * FROM events WHERE id = :id";
     $stmt = $db->prepare($selectSql);
     $stmt->bindParam(':id', $id);
     $stmt->execute();
-    $pengajuan = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $pengajuan = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Periksa apakah data ada
     if (empty($pengajuan)) {
         die('Data tidak ditemukan.');
     }
 
-    // Inisialisasi PDF
-    $pdf = new PDF('L');
+    $pdf = new PDF('P', 'mm', 'A4');
     $pdf->AddPage();
 
-    // Judul
-    $pdf->SetFont('Arial', 'B', 16);
-    $pdf->Cell(0, 10, 'Surat Tugas Bidang Jaringan', 0, 1, 'C');
+    $pdf->SetFont('Arial', '', 12);
+    $pdf->Cell(30, 7, 'Nomor', 0, 0);
+    $pdf->Cell(3, 7, ':', 0, 0);
+    $pdf->Cell(0, 7, '......../...../...../2024', 0, 1);
 
-    // Header Tabel
+    $pdf->Cell(30, 7, 'Lampiran', 0, 0);
+    $pdf->Cell(3, 7, ':', 0, 0);
+    $pdf->Cell(0, 7, '-', 0, 1);
+
+    $pdf->Cell(30, 7, 'Hal', 0, 0);
+    $pdf->Cell(3, 7, ':', 0, 0);
+    $pdf->Cell(0, 7, 'Surat Tugas', 0, 1);
+
+    $pdf->Ln(10);
+
+    $pdf->MultiCell(0, 7, "Dalam rangka memenuhi kebutuhan operasional jaringan di lokasi " . $pengajuan['title'] . ", dengan ini kami menugaskan Saudara untuk melaksanakan tugas sebagai berikut:");
+    
+    $pdf->Ln(5);
     $pdf->SetFont('Arial', 'B', 12);
     $pdf->Cell(15, 10, 'No', 1, 0, 'C');
-    $pdf->Cell(80, 10, 'Tanggal', 1, 0, 'C');
-    $pdf->Cell(60, 10, 'Tempat', 1, 0, 'C');
-    $pdf->Cell(60, 10, 'Keterangan', 1, 1, 'C');
+    $pdf->Cell(165, 10, 'Pemasang', 1, 1, 'C');
 
-    // Isi Tabel
     $pdf->SetFont('Arial', '', 12);
-    $nomor = 1; // Inisialisasi nomor urut
-    foreach ($pengajuan as $event) {
+
+    // Pisahkan nama pemasang
+    $pemasang_list = explode(', ', $pengajuan['pemasang']);
+    $nomor = 1;
+
+    foreach ($pemasang_list as $pemasang) {
         $pdf->Cell(15, 10, $nomor, 1, 0, 'C');
-        $pdf->Cell(80, 10, indoDate($event['tanggal']), 1, 0, 'L');
-        $pdf->Cell(60, 10, $event['title'], 1, 0, 'L');
-        $pdf->Cell(60, 10, $event['keterangan'], 1, 1, 'L');
+        $pdf->Cell(165, 10, trim($pemasang), 1, 1, 'L');
         $nomor++;
     }
 
     $pdf->Ln(10);
+    $pdf->MultiCell(0, 7, "Demikian surat tugas ini dibuat untuk dapat dilaksanakan dengan sebaik-baiknya. Segala biaya yang timbul sebagai akibat dari pelaksanaan tugas ini akan ditanggung sesuai dengan peraturan yang berlaku.");
 
+    $pdf->Ln(15);
     $pdf->Cell(0, 10, 'Banjarbaru, ' . date('d F Y'), 0, 1, 'R');
-    // Informasi Pimpinan
     $pdf->SetFont('Arial', 'I', 14);
     $pdf->Cell(0, 10, 'Mengetahui, ', 0, 1, 'R');
     $pdf->Cell(0, 5, 'Kepala Dinas', 0, 1, 'R');
-    $pdf->Cell(0, 10, '', 0, 1, 'R');
+    $pdf->Cell(0, 20, '', 0, 1, 'R');
     $pdf->SetFont('Arial', 'U', 14);
     $pdf->Cell(0, 10, ' Asep Saputra, S. Kom, MM ', 0, 1, 'R');
     $pdf->SetFont('Arial', '', 14);
     $pdf->Cell(0, 5, 'NIP. 19770909 200604 1 006', 0, 1, 'R');
 
-    // Outputkan file PDF langsung ke browser
     $pdf->Output('D', 'Surat Tugas.pdf');
     exit();
 }
 
-// Memeriksa apakah ID sudah dikirim melalui GET
+
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-
-    // Memanggil fungsi untuk membuat PDF dengan filter ID
     createPDF($id);
 } else {
     echo "ID tidak ditemukan.";

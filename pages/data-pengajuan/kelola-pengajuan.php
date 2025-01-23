@@ -27,6 +27,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmtUpdateGangguan->bindParam(':gangguan_id', $gangguan_id);
 
     if ($stmtUpdatePengajuan->execute() && $stmtUpdateGangguan->execute()) {
+        // Ambil data nama_perwakilan dan no_telpon
+        $queryPengajuan = "SELECT nama_perwakilan, no_telpon, tempat FROM data_pengajuan WHERE id = :id";
+        $stmtPengajuan = $db->prepare($queryPengajuan);
+        $stmtPengajuan->bindParam(':id', $pengajuan_id);
+        $stmtPengajuan->execute();
+        $pengajuanData = $stmtPengajuan->fetch(PDO::FETCH_ASSOC);
+
+        if ($pengajuanData) {
+            $namaPerwakilan = $pengajuanData['nama_perwakilan'];
+            $noTelpon = $pengajuanData['no_telpon'];
+            $tempat =  $pengajuanData['tempat'];
+            $messagePengajuan = "Pengajuan atas nama $namaPerwakilan,  yang bertempat di $tempat telah $status.";
+            
+
+            sendWhatsAppMessage($messagePengajuan, $noTelpon); // Kirim pesan WhatsApp untuk pengajuan
+        }
+        // Ambil data gangguan untuk notifikasi
+        $queryGangguan = "SELECT perwakilan, nomor_telepon, nama_tempat FROM gangguan WHERE no_pengajuan = :no_pengajuan";
+        $stmtGangguan = $db->prepare($queryGangguan);
+        $stmtGangguan->bindParam(':no_pengajuan', $gangguan_id);
+        $stmtGangguan->execute();
+        $gangguanData = $stmtGangguan->fetch(PDO::FETCH_ASSOC);
+        
+        if ($gangguanData) {
+            $perwakilan = $gangguanData['perwakilan'];
+            $nomorTelpon = $gangguanData['nomor_telepon'];
+            $namatempat = $gangguanData['nama_tempat'];
+            $messageGangguan = "Gangguan atas nama $perwakilan, yang bertempat di $namatempat telah $status.";
+            
+            sendWhatsAppMessage($messageGangguan, $nomorTelpon); // Kirim pesan WhatsApp untuk gangguan
+        }
+        
+
         echo "<div class='alert alert-success'>Pengajuan dan gangguan berhasil diperbarui.</div>";
     } else {
         echo "<div class='alert alert-danger'>Error: " . $stmtUpdatePengajuan->errorInfo()[2] . " / " . $stmtUpdateGangguan->errorInfo()[2] . "</div>";
@@ -53,6 +86,7 @@ $resultGangguan = $stmtGangguan->fetchAll(PDO::FETCH_ASSOC);
 
 $db = null; // Tutup koneksi database
 ?>
+
 <?php include_once "partials/scripts.php" ?>
 <!DOCTYPE html>
 <html>

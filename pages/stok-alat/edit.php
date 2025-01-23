@@ -15,13 +15,17 @@ if (isset($_GET['id_stok'])) {
             $updateSQL = "UPDATE stok_alat SET nama_alat = ?, jumlah = ?, harga = ?, foto = ? WHERE id_stok=?";
             $stmt = $db->prepare($updateSQL);
             $stmt->bindParam(1, $_POST['nama_alat']);
-            $stmt->bindParam(2, $_POST['harga']);
-            $stmt->bindParam(3, $_POST['jumlah']);
+            $stmt->bindParam(2, $_POST['jumlah']);
+            $stmt->bindParam(3, $_POST['harga']);
             
-            // Unggah foto hanya jika file baru diunggah
             if ($_FILES['foto']['size'] > 0) {
                 $fotoFileName = $_FILES['foto']['name'];
                 $tmp_file = $_FILES['foto']['tmp_name'];
+                // Proses konversi jika ekstensi file adalah .jfif
+                if (strtolower(pathinfo($fotoFileName, PATHINFO_EXTENSION)) == 'jfif') {
+                    $tmp_file = convertJfifToJpg($tmp_file);
+                    $fotoFileName = str_replace('.jfif', '.jpg', $fotoFileName); // Update nama file setelah konversi
+                }
                 $targetDir = "uploaded_images/";
                 $targetFile = $targetDir . basename($fotoFileName);
                 $stmt->bindParam(4, $fotoFileName);
@@ -29,6 +33,7 @@ if (isset($_GET['id_stok'])) {
                 // Jika tidak ada file yang diunggah, gunakan nilai sebelumnya
                 $stmt->bindParam(4, $row['foto']);
             }
+            
 
             $stmt->bindParam(5, $_POST['id_stok']);
             
@@ -51,6 +56,14 @@ if (isset($_GET['id_stok'])) {
             echo "<meta http-equiv='refresh' content='0; url=?page=tampil-stok-alat'>";
         }
     }
+}
+
+function convertJfifToJpg($imagePath) {
+    $image = imagecreatefromjpeg($imagePath); // Buat gambar dari file jfif
+    $newPath = str_replace('.jfif', '.jpg', $imagePath); // Ganti ekstensi ke jpg
+    imagejpeg($image, $newPath); // Simpan gambar sebagai jpg
+    imagedestroy($image); // Hapus dari memori
+    return $newPath; // Return path gambar baru
 }
 ?>
 

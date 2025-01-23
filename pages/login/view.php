@@ -55,8 +55,42 @@
             cursor: pointer;
         }
 
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
         .error-message {
             color: red;
+        }
+
+        .telegram-button {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            background-color: #0088cc;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .telegram-button img {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .register-link {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            background-color: rgba(0, 123, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -69,13 +103,20 @@
                 <input type="password" name="password" placeholder="Password" required>
                 <input type="submit" value="Login">
             </form>
-            <a href="tambah-umum.php">Daftar</a>
+            <div class="actions">
+                <a href="tambah-umum.php" class="register-link">Daftar</a>
+                <!-- <a href="https://t.me/+Ltzh2q-NaVwwZTM1" class="telegram-button" target="_blank">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram Logo">
+                    Telegram
+                </a> -->
+            </div>
+            <!-- <p>sebelum melakukan pengajuan diharapkan masuk kedalam grup telegram agar bisa dikirim notifikasi</p> -->
             <?php
                 // Tampilkan pesan kesalahan jika ada
                 if (isset($_GET['error'])) {
                     echo '<p class="error-message">Username atau password salah.</p>';
                 }
-                ?>
+            ?>
         </div>
     </div>
 </body>

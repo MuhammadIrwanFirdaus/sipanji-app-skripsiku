@@ -124,7 +124,8 @@ if (isset($_POST['button_create'])) {
                 </div>
                 <div class="form-group">
                     <label for="surat_pengajuan">Surat Pengajuan (PDF)</label>
-                    <input type="file" class="form-control-file" name="surat_pengajuan" accept=".pdf" required>
+                    <input type="file" class="form-control-file" name="surat_pengajuan" accept=".pdf" required><br>
+                    <a class='btn btn-info mr-1' href='?page=pdf-surat-pengajuan'>Surat Pengajuan</a>
                 </div>
                 <div class="form-group">
                     <label for="foto">Unggah Foto</label>

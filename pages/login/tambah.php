@@ -159,6 +159,7 @@ if (isset($_POST['button_create'])) {
                         <option value="admin">Admin</option>
                         <option value="kominfo">Kominfo</option>
                         <option value="instansi">Instansi</option>
+                        <option value="kadis">Kepala Dinas</option>
                         <option value="umum">Umum</option>
                     </select>
                 </div>
